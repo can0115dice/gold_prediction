@@ -37,3 +37,5 @@ ipykernel>=6.0.0       # 让虚拟环境能被 Cursor / Jupyter 识别为内核
 
 # 其他工具
 python-dateutil>=2.8.0 # 日期处理工具
+
+altair==5.2.0          # 另一种数据可视化库，适合统计图表
