@@ -127,7 +127,7 @@ def make_metrics_bar(df_seq: pd.DataFrame):
 
 def placeholder_fig(title: str):
     fig = go.Figure()
-    fig.add_annotation(text="暂无数据", x=0.5, y=0.5, xref="paper", yref="paper", showarrow=False, font=dict(size=20, color="gray"))
+    fig.add_annotation(text="No data available", x=0.5, y=0.5, xref="paper", yref="paper", showarrow=False, font=dict(size=20, color="gray"))
     fig.update_layout(template="plotly_white", height=360, title=title)
     return fig
 
@@ -172,11 +172,11 @@ def load_loss_df(seq_len: int) -> pd.DataFrame:
 def normalize_scheme_name(s: str) -> str:
     t = str(s).strip().upper()
     if t.startswith("A"):
-        return "A-宏观(3�?"
+        return "A-Macro(3D)"
     if t.startswith("B"):
-        return "B-扩展(10�?"
+        return "B-Extended(10D)"
     if t.startswith("C"):
-        return "C-全部(11�?"
+        return "C-All(11D)"
     return str(s)
 
 
@@ -185,7 +185,7 @@ def filter_loss_by_scheme(loss_df: pd.DataFrame, scheme_label: str) -> pd.DataFr
         return loss_df
     if "scheme" not in loss_df.columns:
         # Backward-compatible: old loss CSV without scheme defaults to C.
-        default_scheme = "C-全部(11�?"
+        default_scheme = "C-All(11D)"
         return loss_df.copy() if scheme_label == default_scheme else pd.DataFrame(columns=loss_df.columns)
     out = loss_df.copy()
     out["scheme"] = out["scheme"].map(normalize_scheme_name)
@@ -306,8 +306,8 @@ def main():
     with st.sidebar:
         st.markdown("### ⚙️ Model Configuration")
         st.markdown("**Models:** Linear, Ridge, SVR, LSTM, GRU")
-        seq_len = st.selectbox("选择 SEQ_LEN", options=SEQ_OPTIONS, index=0)
-        st.markdown(f"**当前 SEQ_LEN:** {seq_len} �?)
+        seq_len = st.selectbox("Select SEQ_LEN", options=SEQ_OPTIONS, index=0)
+        st.markdown(f"**Current SEQ_LEN:** {seq_len} days")
         st.markdown("---")
 
         st.markdown("### 📊 Model Performance")
@@ -316,7 +316,7 @@ def main():
         selected_model = st.selectbox("Select model to view metrics", MODEL_ORDER)
         m = metrics_map.get(selected_model)
         if m is None:
-            st.warning("该模型在当前 SEQ_LEN 暂无数据")
+            st.warning("No data available for this model at current SEQ_LEN")
         else:
             c1, c2 = st.columns(2)
             with c1:
@@ -328,12 +328,12 @@ def main():
                 st.metric("Train R²", f"{m['train_r2']:.4f}")
                 st.metric("Gap", f"{m['gap']:.4f}")
 
-    st.markdown(f"<div class='small-note'>当前 SEQ_LEN = {seq_len} �?/div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='small-note'>Current SEQ_LEN = {seq_len} days</div>", unsafe_allow_html=True)
 
     st.markdown("### 🧾 Results Table")
     df_seq = df_all[df_all["seq_len"] == seq_len].copy()
     if df_seq.empty:
-        st.warning("当前 SEQ_LEN 暂无实验结果")
+        st.warning("No experimental results for current SEQ_LEN")
     else:
         st.dataframe(
             df_seq[["model", "seq_len", "mae", "rmse", "mape", "test_r2", "train_r2", "gap", "train_time_sec"]].sort_values("model"),
@@ -346,7 +346,7 @@ def main():
     pred_options = [m for m in MODEL_ORDER if (not pred_df.empty and m in pred_df.columns)]
     if not pred_options:
         pred_options = MODEL_ORDER
-    model_choice = st.selectbox("选择预测曲线模型", pred_options, key="pred_model")
+    model_choice = st.selectbox("Select prediction model", pred_options, key="pred_model")
     if pred_df.empty or model_choice not in pred_df.columns:
         shown = show_static_fallback_image(
             ["lstm_prediction.png", "best_traditional_prediction.png"],
@@ -354,14 +354,14 @@ def main():
         )
         if not shown:
             st.plotly_chart(placeholder_fig(f"Actual vs {model_choice}"), width="stretch")
-            st.caption("当前 SEQ_LEN 对应的预测序列文件缺失，显示占位图�?)
+            st.caption("Prediction file missing for current SEQ_LEN, showing placeholder")
     else:
         st.plotly_chart(make_actual_vs_pred(pred_df, model_choice), width="stretch")
 
     st.markdown("### 📉 LSTM / GRU Loss Curves")
     loss_df = load_loss_df(seq_len)
-    scheme_options = ["A-宏观(3�?", "B-扩展(10�?", "C-全部(11�?"]
-    selected_scheme = st.selectbox("选择特征方案", scheme_options, index=2, key="loss_scheme")
+    scheme_options = ["A-Macro(3D)", "B-Extended(10D)", "C-All(11D)"]
+    selected_scheme = st.selectbox("Select feature scheme", scheme_options, index=2, key="loss_scheme")
     scheme_loss_df = filter_loss_by_scheme(loss_df, selected_scheme)
     c_lstm, c_gru = st.columns(2)
     with c_lstm:
@@ -369,7 +369,7 @@ def main():
     with c_gru:
         st.plotly_chart(make_single_model_loss_curve(scheme_loss_df, "GRU"), width="stretch")
     if scheme_loss_df.empty:
-        st.caption("当前 SEQ_LEN + 方案组合暂无 loss 明细数据，显示交互占位图�?)
+        st.caption("No loss detail data for current SEQ_LEN + scheme combination, showing interactive placeholder")
 
     st.markdown("### 📦 Metrics Bar")
     if df_seq.empty:
@@ -382,8 +382,8 @@ def main():
         else:
             st.plotly_chart(make_metrics_bar(bar_df), width="stretch")
 
-    st.markdown("### 🖼�?Notebook 可视化（交互版）")
-    st.caption("�?notebook 的核心可视化改为交互图（缩放/悬停），效果�?Actual vs Predicted 一致�?)
+    st.markdown("### 🖼️Notebook Visualizations (Interactive)")
+    st.caption("Core notebook visualizations converted to interactive charts (zoom/hover), consistent with Actual vs Predicted")
     raw_df = load_raw_data()
     col_a, col_b = st.columns(2)
     with col_a:
