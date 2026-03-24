@@ -1,28 +1,4 @@
-# ================================
-# 黄金价格预测项目依赖包
-# Python 版本要求: 3.8+
-#
-# 推荐安装方式（使用虚拟环境）：
-#   python -m venv .venv
-#   .venv\Scripts\activate          （Windows）
-#   source .venv/bin/activate       （Mac/Linux）
-#   pip install -r requirements.txt
-# ================================
-
-# 数据处理相关
-pandas==2.2.1
-numpy==1.26.4
-
-# 数据可视化相关
-matplotlib==3.8.4
-seaborn>=0.12.0
-plotly>=5.10.0
-
-# 机器学习相关
-scikit-learn==1.4.1
-
-# 深度学习相关
-torch>=1.13.0
-
-# Web前端相关
-streamlit==1.32.2
+streamlit==1.55.0
+pandas==2.3.3
+numpy==2.4.1
+plotly==6.6.0
