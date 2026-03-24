@@ -172,11 +172,11 @@ def load_loss_df(seq_len: int) -> pd.DataFrame:
 def normalize_scheme_name(s: str) -> str:
     t = str(s).strip().upper()
     if t.startswith("A"):
-        return "A-宏观(3维)"
+        return "A-宏观(3�?"
     if t.startswith("B"):
-        return "B-扩展(10维)"
+        return "B-扩展(10�?"
     if t.startswith("C"):
-        return "C-全部(11维)"
+        return "C-全部(11�?"
     return str(s)
 
 
@@ -185,7 +185,7 @@ def filter_loss_by_scheme(loss_df: pd.DataFrame, scheme_label: str) -> pd.DataFr
         return loss_df
     if "scheme" not in loss_df.columns:
         # Backward-compatible: old loss CSV without scheme defaults to C.
-        default_scheme = "C-全部(11维)"
+        default_scheme = "C-全部(11�?"
         return loss_df.copy() if scheme_label == default_scheme else pd.DataFrame(columns=loss_df.columns)
     out = loss_df.copy()
     out["scheme"] = out["scheme"].map(normalize_scheme_name)
@@ -209,7 +209,7 @@ def show_static_fallback_image(candidates, caption_prefix="Static fallback"):
     for name in candidates:
         p = FIG_DIR / name
         if p.exists():
-            st.image(str(p), caption=f"{caption_prefix}: {name}", use_container_width=True)
+            st.image(str(p), caption=f"{caption_prefix}: {name}", width="stretch")
             return True
     return False
 
@@ -307,7 +307,7 @@ def main():
         st.markdown("### ⚙️ Model Configuration")
         st.markdown("**Models:** Linear, Ridge, SVR, LSTM, GRU")
         seq_len = st.selectbox("选择 SEQ_LEN", options=SEQ_OPTIONS, index=0)
-        st.markdown(f"**当前 SEQ_LEN:** {seq_len} 天")
+        st.markdown(f"**当前 SEQ_LEN:** {seq_len} �?)
         st.markdown("---")
 
         st.markdown("### 📊 Model Performance")
@@ -328,7 +328,7 @@ def main():
                 st.metric("Train R²", f"{m['train_r2']:.4f}")
                 st.metric("Gap", f"{m['gap']:.4f}")
 
-    st.markdown(f"<div class='small-note'>当前 SEQ_LEN = {seq_len} 天</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='small-note'>当前 SEQ_LEN = {seq_len} �?/div>", unsafe_allow_html=True)
 
     st.markdown("### 🧾 Results Table")
     df_seq = df_all[df_all["seq_len"] == seq_len].copy()
@@ -337,7 +337,7 @@ def main():
     else:
         st.dataframe(
             df_seq[["model", "seq_len", "mae", "rmse", "mape", "test_r2", "train_r2", "gap", "train_time_sec"]].sort_values("model"),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -353,47 +353,47 @@ def main():
             caption_prefix=f"Actual vs {model_choice}",
         )
         if not shown:
-            st.plotly_chart(placeholder_fig(f"Actual vs {model_choice}"), use_container_width=True)
-            st.caption("当前 SEQ_LEN 对应的预测序列文件缺失，显示占位图。")
+            st.plotly_chart(placeholder_fig(f"Actual vs {model_choice}"), width="stretch")
+            st.caption("当前 SEQ_LEN 对应的预测序列文件缺失，显示占位图�?)
     else:
-        st.plotly_chart(make_actual_vs_pred(pred_df, model_choice), use_container_width=True)
+        st.plotly_chart(make_actual_vs_pred(pred_df, model_choice), width="stretch")
 
     st.markdown("### 📉 LSTM / GRU Loss Curves")
     loss_df = load_loss_df(seq_len)
-    scheme_options = ["A-宏观(3维)", "B-扩展(10维)", "C-全部(11维)"]
+    scheme_options = ["A-宏观(3�?", "B-扩展(10�?", "C-全部(11�?"]
     selected_scheme = st.selectbox("选择特征方案", scheme_options, index=2, key="loss_scheme")
     scheme_loss_df = filter_loss_by_scheme(loss_df, selected_scheme)
     c_lstm, c_gru = st.columns(2)
     with c_lstm:
-        st.plotly_chart(make_single_model_loss_curve(scheme_loss_df, "LSTM"), use_container_width=True)
+        st.plotly_chart(make_single_model_loss_curve(scheme_loss_df, "LSTM"), width="stretch")
     with c_gru:
-        st.plotly_chart(make_single_model_loss_curve(scheme_loss_df, "GRU"), use_container_width=True)
+        st.plotly_chart(make_single_model_loss_curve(scheme_loss_df, "GRU"), width="stretch")
     if scheme_loss_df.empty:
-        st.caption("当前 SEQ_LEN + 方案组合暂无 loss 明细数据，显示交互占位图。")
+        st.caption("当前 SEQ_LEN + 方案组合暂无 loss 明细数据，显示交互占位图�?)
 
     st.markdown("### 📦 Metrics Bar")
     if df_seq.empty:
-        st.plotly_chart(placeholder_fig("Model Metrics Comparison"), use_container_width=True)
+        st.plotly_chart(placeholder_fig("Model Metrics Comparison"), width="stretch")
     else:
         # Only chart models with complete metric values.
         bar_df = df_seq.dropna(subset=["mae", "rmse", "mape"])
         if bar_df.empty:
-            st.plotly_chart(placeholder_fig("Model Metrics Comparison"), use_container_width=True)
+            st.plotly_chart(placeholder_fig("Model Metrics Comparison"), width="stretch")
         else:
-            st.plotly_chart(make_metrics_bar(bar_df), use_container_width=True)
+            st.plotly_chart(make_metrics_bar(bar_df), width="stretch")
 
-    st.markdown("### 🖼️ Notebook 可视化（交互版）")
-    st.caption("将 notebook 的核心可视化改为交互图（缩放/悬停），效果与 Actual vs Predicted 一致。")
+    st.markdown("### 🖼�?Notebook 可视化（交互版）")
+    st.caption("�?notebook 的核心可视化改为交互图（缩放/悬停），效果�?Actual vs Predicted 一致�?)
     raw_df = load_raw_data()
     col_a, col_b = st.columns(2)
     with col_a:
         if raw_df.empty:
-            st.plotly_chart(placeholder_fig("Feature Correlation Heatmap"), use_container_width=True)
+            st.plotly_chart(placeholder_fig("Feature Correlation Heatmap"), width="stretch")
         else:
-            st.plotly_chart(make_feature_corr_heatmap(raw_df), use_container_width=True)
+            st.plotly_chart(make_feature_corr_heatmap(raw_df), width="stretch")
     with col_b:
-        st.plotly_chart(make_seq_len_compare(df_all), use_container_width=True)
-    st.plotly_chart(make_gap_bar(df_seq), use_container_width=True)
+        st.plotly_chart(make_seq_len_compare(df_all), width="stretch")
+    st.plotly_chart(make_gap_bar(df_seq), width="stretch")
 
     st.markdown("---")
     st.markdown(
